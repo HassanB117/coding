@@ -1,0 +1,27 @@
+
+body {
+    background-color: rgb(28, 114, 124);
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+ol {
+font-size: 25px;
+}
+p {
+    color: rgb(51, 0, 255);
+    font-size: 50px;
+    font-family: fantasy;
+}
+h2 {
+    font-size: 40px;
+}
+h1 {
+    font-size: 50px;
+    text-decoration: underline;
+    color: green;
+}
+.two {
+    color: blue;
+    background-color: rgb(15, 204, 204);
+    color: plum;
+    border-radius: 15px;
+}
