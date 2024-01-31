@@ -60,6 +60,15 @@ body {
     border-radius: 20px;
 }
 
+p {
+    font-size: 15px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding-top: 2px;
+    padding-bottom: 20px;
+}
+
 .footer{
     font-size: 20px;
     background-color: #3a3a3a;
