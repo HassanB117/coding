@@ -3,7 +3,7 @@
     <head><title>Thanks</title></head>
     <body>
         <h1>thank you</h1>
-        <h1><a href="form.html">Go Back</a></h1>
+        <h1><a href="../htmlcodingtest/HTML/Form.html">Go Back</a></h1>
     </body>
 </html>
 

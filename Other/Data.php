@@ -4,7 +4,7 @@
     $name=$_POST['name'];
     $data=$name.",".$email;
 
-    $file="../Excel/Sign in Data.xlsx";
+    $file="../Other/Sign in Data.xlsx";
 
     file_put_contents($file, $data . PHP_EOL, FILE_APPEND);
     print "<h1 align=center]Thank you for submitting your email address!</h1>";
