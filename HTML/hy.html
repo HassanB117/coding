@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show Password Button</title>
+    <style>
+        /* Style the input field */
+        input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+
+        /* Style the show password button */
+        .show-password-button {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            padding: 10px 20px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+        }
+
+        /* Style the eye icon */
+        .show-password-button .eye-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Show Password Button</h1>
+
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <button class="show-password-button" onclick="showPassword()">Show Password</button>
+        <span class="eye-icon">&#x25BC;</span>
+    </div>
+
+    <script>
+        function showPassword() {
+            var passwordInput = document.getElementById("password");
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                document.querySelector(".eye-icon").textContent = "&#x25B2;";
+            } else {
+                passwordInput.type = "password";
+                document.querySelector(".eye-icon").textContent = "&#x25BC;";
+            }
+        }
+    </script>
+</body>
+</html>

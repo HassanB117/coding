@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link rel="stylesheet" href="../Login Page/hello.css">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form action="your_backend_login_handler.php" method="post">
+            <label for="username">Username:</label><br>
+            <input type="text" id="username" name="username" required><br>
+
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" name="email" required><br>
+
+            <label for="password">Password:</label><br>
+            <input type="password" id="password" name="password" required>
+
+            <label for="age">Select Your Age:</label><br>
+            <div class="age-selection">
+                <select id="age" name="age">
+                    <option value="under18">Under 18</option>
+                    <option value="18to25">18 to 25</option>
+                    <option value="26to35">26 to 35</option>
+                    <option value="36to50">36 to 50</option>
+                    <option value="over50">Over 50</option>
+                </select>
+            </div><br>
+
+            <a href="../Login Page/Fireworks.html">Login</a>
+        </form>
+    </div>
+</body>
+</html>
