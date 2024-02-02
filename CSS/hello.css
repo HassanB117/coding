@@ -3,7 +3,7 @@
     margin: 0 auto;
     padding: 30px;
     border: 5px solid #ccc;
-    border-radius: 8px;
+    border-radius: 15px;
     background-color: rgb(230, 230, 230);
     position: fixed;
     top: 50%;
@@ -33,7 +33,7 @@ a {
     font-size: 15px;
     color: white;
     background-color: rgb(32, 170, 32);
-    padding: 10px 83px;
+    padding: 10px 80px;
     border: none;
     border-radius: 10px;
     cursor: pointer;
