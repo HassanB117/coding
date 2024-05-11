@@ -3,7 +3,7 @@ body {
     color: aliceblue;
     font-family: "Tajawal", sans-serif;
     margin: 32px;
-}   
+}
 
 @import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&family=Tajawal:wght@200;300;400;500;700;800;900&display=swap');
 
@@ -15,61 +15,68 @@ h1 {
 h2 {
     font-size: 30px;
     text-align: center;
-    font-family: "Tajawal", sans-serif;
 }
 
-.menu, .old menu {
-                        font-size: 20px;
-                        background-color: #3a3a3a;
-                        border-radius: 15px;
-                        max-width: 1200px;
-                        margin: 0 auto;
-                    }
+.menu, .old-menu {
+    font-size: 20px;
+    background-color: #3a3a3a;
+    border-radius: 15px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
 
-                    .menu ul {
-                        text-align: center;
-                        padding: 20px;
-                        text-decoration: none;
-                    }
+.menu ul, .old-menu ul {
+    text-align: center;
+    padding: 20px;
+    text-decoration: none;
+}
 
-                    .menu li {
-                        display: inline-block;
-                    }
+.menu li, .old-menu li {
+    display: inline-block;
+}
 
-                    .menu li a {
-                        display: inline-block;
-                        height: auto;
-                        width: 150px;
-                        color: aliceblue;
-                        background-color: #2d2d2d;
-                        padding: 10px;
-                        margin: 5px;
-                        text-align: center;
-                        font-size: 30px;
-                        font-weight: bold;
-                        text-decoration: none;
-                        border-radius: 5px;
-                        transition: all 0.3s ease;
-                    }
+.menu li a, .old-menu li a {
+    display: inline-block;
+    height: auto;
+    width: 150px;
+    color: aliceblue;
+    background-color: #2d2d2d;
+    padding: 10px;
+    margin: 5px;
+    text-align: center;
+    font-size: 30px;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
 
-                    .menu li a:hover {
-                        background-color: #505050;
-                    }
+.menu li a:hover, .old-menu li a:hover {
+    background-color: #505050;
+}
 
-                    .collapsible {
-                        background-color: #3a3a3a;
-                        color: white;
-                        cursor: pointer;
-                        padding: 18px;
-                        width: 100%;
-                        border: none;
-                        text-align: left;
-                        outline: none;
-                        font-size: 15px;
-                        border-radius: 15px;
-                        transition: all 0.3s ease;
-                        max-width: 1200px;
-                    }
+.collapsible {
+    background-color: #3a3a3a;
+    color: white;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    max-width: 1200px;
+}
+
+.center-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-top: 20px;
+}
 
 .active, .collapsible:hover {
     background-color: #505050;
@@ -99,15 +106,15 @@ h2 {
         font-size: 35px;
     }
 
-    .menu, .old menu {
+    .menu, .old-menu {
         font-size: 25px;
     }
 
-    .menu ul {
+    .menu ul, .old-menu ul {
         padding: 20px;
     }
 
-    .menu li a {
+    .menu li a, .old-menu li a {
         width: 100px;
         font-size: 25px;
     }

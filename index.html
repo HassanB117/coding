@@ -1,29 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Hub Page</title>
-        <link rel="shortcut icon" type="x-icon" href="../htmlcodingtest/images/hub.png">
-        <link rel="stylesheet" href="CSS/main.css">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hub Page</title>
+    <link rel="shortcut icon" type="x-icon" href="../htmlcodingtest/images/hub.png">
+    <link rel="stylesheet" href="CSS/main.css">
+</head>
 
-    <body>
-        <h1>My Pages</h1>
-        <div class="menu">
-            <ul>
-                <li><a href="../htmlcodingtest/HTML/caml.html" target="_blank">caml</a></li>
-                <li><a href="../htmlcodingtest/HTML/hello.html" target="_blank">hello</a></li>
-                <li><a href="../htmlcodingtest/HTML/hi.html" target="_blank">hi</a></li>
-                <li><a href="../htmlcodingtest/HTML/HOme.html" target="_blank">HOme</a></li>
-                <li><a href="../htmlcodingtest/HTML/Nintendo.html" target="_blank">Nintendo</a></li>
-                <li><a href="../htmlcodingtest/HTML/MouseToggle.html" target="_blank">Toggle</a></li>
-            </ul>
-        </div>
+<body>
+    <h1>My Pages</h1>
+    <div class="menu">
+        <ul>
+            <li><a href="../htmlcodingtest/HTML/caml.html" target="_blank">caml</a></li>
+            <li><a href="../htmlcodingtest/HTML/hello.html" target="_blank">hello</a></li>
+            <li><a href="../htmlcodingtest/HTML/hi.html" target="_blank">hi</a></li>
+            <li><a href="../htmlcodingtest/HTML/HOme.html" target="_blank">HOme</a></li>
+            <li><a href="../htmlcodingtest/HTML/Nintendo.html" target="_blank">Nintendo</a></li>
+            <li><a href="../htmlcodingtest/HTML/MouseToggle.html" target="_blank">Toggle</a></li>
+        </ul>
+    </div>
 
-        <button class="collapsible"><h2>Old Tries</h2></button>
+    <div class="center-container">
+        <button class="collapsible"><h2>Old Tries</h2></button></div>
         <div class="content">
-            <div class="old menu">
+            <div class="old-menu">
                 <ul>
                     <li><a href="../htmlcodingtest/HTML/117.html" target="_blank">117</a></li>
                     <li><a href="../htmlcodingtest/HTML/Form.html" target="_blank">Form</a></li>
@@ -44,18 +45,18 @@
             </div>
         </div>
 
-        <script>
-            var coll = document.querySelector(".collapsible");
-            var content = document.querySelector(".content");
+    <script>
+        var coll = document.querySelector(".collapsible");
+        var content = document.querySelector(".content");
         
-            coll.addEventListener("click", function() {
-                this.classList.toggle("active");
-                if (this.classList.contains("active")) {
-                    content.style.maxHeight = content.scrollHeight + "px";
-                } else {
-                    content.style.maxHeight = null;
-                }
-            });
-        </script>
-    </body>
+        coll.addEventListener("click", function() {
+            this.classList.toggle("active");
+            if (this.classList.contains("active")) {
+                content.style.maxHeight = content.scrollHeight + "px";
+            } else {
+                content.style.maxHeight = null;
+            }
+        });
+    </script>
+</body>
 </html>
