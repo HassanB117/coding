@@ -11,34 +11,34 @@
 <body>
     <h1>My Pages</h1>
 
-    <div>
-        <h1>Your IP Addresses:</h1>
-        <p><strong>IPv4:</strong> <span id="ipv4">Loading...</span></p>
-        <p><strong>IPv6:</strong> <span id="ipv6">Loading...</span></p>
-    
-        <script>
-            // Fetch IPv4
-            fetch('https://api.ipify.org?format=json')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('ipv4').textContent = data.ip;
-                })
-                .catch(error => {
-                    document.getElementById('ipv4').textContent = "Error fetching IPv4";
-                    console.error("IPv4 Error:", error);
-                });
-    
-            // Fetch IPv6
-            fetch('https://api64.ipify.org?format=json')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('ipv6').textContent = data.ip;
-                })
-                .catch(error => {
-                    document.getElementById('ipv6').textContent = "Error fetching IPv6";
-                    console.error("IPv6 Error:", error);
-                });
-        </script>
+    <div class="box">
+        <div class="ip">
+            <p id="no-margin">Your IP:</p>
+            <p id="no-margin"><strong>IPv6:</strong> <span id="ipv6">Loading...</span></p>
+            <p id="no-margin"><strong>IPv4:</strong> <span id="ipv4">Loading...</span></p>
+            <script>
+                // Fetch IPv6
+                fetch('https://api64.ipify.org?format=json')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('ipv6').textContent = data.ip;
+                    })
+                    .catch(error => {
+                        document.getElementById('ipv6').textContent = "Error fetching IPv6";
+                        console.error("IPv6 Error:", error);
+                    });
+                // Fetch IPv4
+                fetch('https://api.ipify.org?format=json')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('ipv4').textContent = data.ip;
+                    })
+                    .catch(error => {
+                        document.getElementById('ipv4').textContent = "Error fetching IPv4";
+                        console.error("IPv4 Error:", error);
+                    });
+            </script>
+        </div>
     </div>
 
     <div class="menu">

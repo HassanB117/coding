@@ -17,11 +17,29 @@ h2 {
     text-align: center;
 }
 
+.box {
+    position: fixed;
+    top: 1%;
+    left: 1%;
+    transform: translate(1%, 1%);
+    -webkit-transform: (1%, 1%);
+}
+
+.ip {
+    font-size: 75%;
+    color: rgb(190, 190, 190);
+}
+
+#no-margin {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
 .menu, .old-menu {
     font-size: 20px;
     background-color: #3a3a3a;
     border-radius: 15px;
-    max-width: 1200px;
+    max-width: 1148px;
     margin: 0 auto;
 }
 
@@ -67,7 +85,7 @@ h2 {
     font-size: 15px;
     border-radius: 15px;
     transition: all 0.3s ease;
-    max-width: 1200px;
+    max-width: 1148px;
 }
 
 .center-container {
@@ -104,6 +122,11 @@ h2 {
 @media screen and (max-width: 600px) {
     h1 {
         font-size: 35px;
+        margin-top: 50px;
+    }
+
+    .ip {
+        font-size: 60%;
     }
 
     .menu, .old-menu {
@@ -123,4 +146,17 @@ h2 {
         padding: 15px;
         font-size: 15px;
     }
+}
+
+@media screen and (max-width: 250px) {
+    * {
+        color: transparent !important;
+        visibility: hidden !important;
+        border: none !important;
+    }
+    
+    body {
+        visibility: visible !important;
+    }
+    
 }
