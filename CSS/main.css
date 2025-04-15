@@ -73,6 +73,11 @@ h2 {
     background-color: #505050;
 }
 
+#green:hover {
+    color: #ff09ca;
+    background-color: #00ffc8;
+}
+
 .collapsible {
     background-color: #3a3a3a;
     color: white;
