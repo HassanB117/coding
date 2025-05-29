@@ -129,50 +129,46 @@
   <script>
     const map = document.getElementById('map');
     const mapLoading = document.getElementById('map-loading');
-
+  
     map.onload = () => {
       map.classList.add('loaded');
       mapLoading.style.display = 'none';
     };
-
-    map.onerror = () => {
-      mapLoading.textContent = "Failed to load map.";
-    };
-
-    async function fetchIPData() {
-      try {
-        const ipv6Res = await fetch('https://api64.ipify.org?format=json');
-        const ipv6Data = await ipv6Res.json();
-        document.getElementById('ipv6').textContent = ipv6Data.ip;
-
-        const ipv4Res = await fetch('https://api.ipify.org?format=json');
-        const ipv4Data = await ipv4Res.json();
-        document.getElementById('ipv4').textContent = ipv4Data.ip;
-
-        const locRes = await fetch('https://ipapi.co/json/');
-        const locData = await locRes.json();
-
-        document.getElementById('country').textContent = locData.country_name;
-        document.getElementById('region').textContent = locData.region;
-        document.getElementById('city').textContent = locData.city;
-        document.getElementById('isp').textContent = locData.org;
-
-        const lat = locData.latitude;
-        const lon = locData.longitude;
-        map.src = `https://www.google.com/maps?q=${lat},${lon}&hl=en&z=12&output=embed`;
-      } catch (err) {
-        console.error("IP fetch error:", err);
-        document.getElementById('ipv6').textContent = "Error";
-        document.getElementById('ipv4').textContent = "Error";
+  
+    // IPv6
+    fetch('https://api64.ipify.org?format=json')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('ipv6').textContent = data.ip;
+      });
+  
+    // IPv4
+    fetch('https://api.ipify.org?format=json')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('ipv4').textContent = data.ip;
+      });
+  
+    // Location info
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('country').textContent = data.country_name;
+        document.getElementById('region').textContent = data.region;
+        document.getElementById('city').textContent = data.city;
+        document.getElementById('isp').textContent = data.org;
+  
+        const lat = data.latitude;
+        const lon = data.longitude;
+        const gmapURL = `https://www.google.com/maps?q=${lat},${lon}&hl=en&z=12&output=embed`;
+        map.src = gmapURL;
+      })
+      .catch(() => {
         document.getElementById('country').textContent = "Error";
         document.getElementById('region').textContent = "-";
         document.getElementById('city').textContent = "-";
         document.getElementById('isp').textContent = "-";
-        mapLoading.textContent = "Failed to load map.";
-      }
-    }
-
-    fetchIPData();
+      });
   </script>  
 </body>
 </html>
