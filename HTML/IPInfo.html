@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>IP Info</title>
+  <link rel="shortcut icon" type="x-icon" href="images/ip.png">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
   <style>
     * {
@@ -31,7 +32,7 @@
       border-radius: 20px;
       padding: 2rem;
       box-shadow: 0 0 25px rgba(0, 255, 170, 0.15);
-      max-width: 1050px;
+      max-width: 1070px;
       width: 100%;
       animation: popIn 0.5s ease-in-out;
     }
@@ -128,39 +129,46 @@
   <script>
     const map = document.getElementById('map');
     const mapLoading = document.getElementById('map-loading');
-
+  
     map.onload = () => {
       map.classList.add('loaded');
       mapLoading.style.display = 'none';
     };
-
+  
+    // IPv6
     fetch('https://api64.ipify.org?format=json')
       .then(res => res.json())
       .then(data => {
         document.getElementById('ipv6').textContent = data.ip;
       });
-
-    fetch('https://ipapi.co/json/')
+  
+    // IPv4
+    fetch('https://api.ipify.org?format=json')
       .then(res => res.json())
       .then(data => {
         document.getElementById('ipv4').textContent = data.ip;
+      });
+  
+    // Location info
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
         document.getElementById('country').textContent = data.country_name;
         document.getElementById('region').textContent = data.region;
         document.getElementById('city').textContent = data.city;
         document.getElementById('isp').textContent = data.org;
-
+  
         const lat = data.latitude;
         const lon = data.longitude;
         const gmapURL = `https://www.google.com/maps?q=${lat},${lon}&hl=en&z=12&output=embed`;
         map.src = gmapURL;
       })
       .catch(() => {
-        document.getElementById('ipv4').textContent = "IPv4 fetch error";
         document.getElementById('country').textContent = "Error";
         document.getElementById('region').textContent = "-";
         document.getElementById('city').textContent = "-";
         document.getElementById('isp').textContent = "-";
       });
-  </script>
+  </script>  
 </body>
 </html>
