@@ -134,6 +134,10 @@
       map.classList.add('loaded');
       mapLoading.style.display = 'none';
     };
+
+    map.onerror = () => {
+      mapLoading.textContent = "Failed to load map.";
+    };
   
     // IPv6
     fetch('https://api64.ipify.org?format=json')
@@ -168,6 +172,7 @@
         document.getElementById('region').textContent = "-";
         document.getElementById('city').textContent = "-";
         document.getElementById('isp').textContent = "-";
+        mapLoading.textContent = "Failed to load map.";
       });
   </script>  
 </body>
