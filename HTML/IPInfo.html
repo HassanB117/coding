@@ -1,240 +1,389 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>IP Info — Rebuilt</title>
-  <link rel="icon" href="data:;base64,iVBORw0KGgo="> <!-- tiny blank icon to avoid 404s -->
-  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg-1:#0b0b0d;
-      --bg-2:#121214;
-      --panel:#161616ee;
-      --accent:#00ffc8;
-      --muted:#9aa6a6;
-      --glass: rgba(255,255,255,0.02);
-      --radius:14px;
-      font-synthesis: none;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;min-height:100%;
-      font-family:"Rubik",system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
-      background: linear-gradient(180deg,var(--bg-1),var(--bg-2));
-      color:#e9ffff;display:flex;align-items:center;justify-content:center;padding:28px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNSC Network Diagnostics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #030508;
+            --accent: #00ffc8;
+            --accent-glow: rgba(0, 255, 200, 0.2);
+            --card: rgba(8, 12, 16, 0.9);
+            --muted: #5a6b6b;
+            --border: rgba(0, 255, 200, 0.25);
+            --radius: 2px;
+        }
 
-    .card{
-      width:100%;max-width:1100px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.2));
-      border-radius:var(--radius);padding:18px;display:grid;grid-template-columns:1fr 420px;gap:18px;box-shadow:0 8px 30px rgba(0,0,0,0.6);
-      border:1px solid rgba(255,255,255,0.03);
-    }
+        * { box-sizing: border-box; cursor: crosshair; }
 
-    header{display:flex;align-items:center;gap:12px}
-    .logo{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#00a8ff);display:flex;align-items:center;justify-content:center;font-weight:700;color:#001;}
-    h1{font-size:1.05rem;margin:0}
-    p.lead{margin:0;color:var(--muted);font-size:0.92rem}
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Space Grotesk', system-ui, sans-serif;
+            background: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #e9ffff;
+            padding: 20px;
+            overflow: hidden;
+        }
 
-    .left{padding:6px 8px}
-    .data{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
-    .item{background:var(--glass);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)}
-    .label{display:block;font-size:0.78rem;color:var(--muted);}
-    .value{font-weight:600;margin-top:6px;color:#e7fff6;word-break:break-word}
+        #neural-link {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
 
-    .controls{display:flex;gap:8px;margin-top:12px}
-    button, .link-like{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 10px;border-radius:10px;color:var(--accent);cursor:pointer;font-weight:600}
-    button.secondary{color:var(--muted);border-style:dashed}
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
+        }
 
-    /* map column */
-    .right{display:flex;flex-direction:column;gap:10px}
-    .map-wrap{flex:1;min-height:320px;background:linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.35));border-radius:12px;border:1px solid rgba(0,255,200,0.06);overflow:hidden;position:relative}
-    #map{width:100%;height:100%;display:block;border:0}
-    .map-overlay{position:absolute;left:10px;top:10px;background:rgba(0,0,0,0.45);backdrop-filter:blur(6px);padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+        @keyframes scan {
+            0% { top: 0%; opacity: 0; }
+            5% { opacity: 0.2; }
+            95% { opacity: 0.2; }
+            100% { top: 100%; opacity: 0; }
+        }
 
-    footer.note{font-size:0.78rem;color:var(--muted);margin-top:8px}
+        .hud-container {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--border);
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            box-shadow: inset 0 0 100px rgba(0, 255, 200, 0.05), 0 0 50px rgba(0,0,0,1);
+            position: relative;
+            overflow: hidden;
+        }
 
-    .status{display:flex;gap:10px;align-items:center}
-    .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(0,255,200,0.12)}
+        /* The moving scan line */
+        .hud-container::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--accent);
+            z-index: 5;
+            pointer-events: none;
+            animation: scan 8s linear infinite;
+        }
 
-    /* responsive */
-    @media (max-width:980px){.card{grid-template-columns:1fr 360px}}
-    @media (max-width:720px){.card{grid-template-columns:1fr;}
-      .map-wrap{min-height:260px}
-      .data{grid-template-columns:1fr}
-    }
+        /* CRT Static Overlay */
+        .hud-container::before {
+            content: " ";
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 255, 0, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
 
-    /* small touches */
-    .muted{color:var(--muted)}
-    .center{text-align:center}
+        header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
 
-  </style>
+        .status-badge {
+            padding: 4px 12px;
+            background: var(--accent-glow);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse { 0% { opacity: 1 } 50% { opacity: 0.3 } 100% { opacity: 1 } }
+
+        .bio-signs { width: 180px; }
+        .bio-label { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; display: flex; justify-content: space-between; margin-bottom: 2px; }
+        .bar-bg { height: 6px; background: rgba(255, 255, 255, 0.05); margin-bottom: 10px; }
+        .bar-fill { height: 100%; background: var(--accent); box-shadow: 0 0 15px var(--accent); transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        h1 { margin: 10px 0; font-size: 1.8rem; letter-spacing: -1px; text-transform: uppercase; }
+
+        .data-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; font-family: 'JetBrains Mono', monospace; }
+        .data-node { 
+            background: rgba(0, 255, 200, 0.02); 
+            border: 1px solid rgba(0, 255, 200, 0.05); 
+            padding: 15px; 
+            position: relative; 
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .label { display: block; font-size: 0.6rem; color: var(--muted); text-transform: uppercase; margin-bottom: 5px; }
+        .value { 
+            font-size: 0.9rem; 
+            color: var(--accent); 
+            text-shadow: 0 0 5px var(--accent-glow); 
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-all;
+            line-height: 1.2;
+        }
+
+        .terminal {
+            margin-top: 20px;
+            height: 100px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            padding: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--muted);
+            overflow-y: hidden;
+            position: relative;
+        }
+
+        .controls { display: flex; gap: 10px; margin-top: 20px; }
+        button { background: transparent; border: 1px solid var(--border); padding: 10px 20px; color: #fff; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; transition: 0.3s; }
+        button:hover { background: var(--accent); color: #000; box-shadow: 0 0 20px var(--accent-glow); }
+
+        .map-section { display: flex; flex-direction: column; gap: 10px; }
+        .map-frame { flex: 1; border: 1px solid var(--border); position: relative; min-height: 400px; }
+        #map { width: 100%; height: 100%; filter: invert(1) hue-rotate(130deg) brightness(0.6) contrast(1.2); opacity: 0.8; }
+        
+        .map-overlay-text {
+            position: absolute;
+            top: 10px; right: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--accent);
+            text-align: right;
+            pointer-events: none;
+            z-index: 6;
+        }
+
+        .loading-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 999; display: flex; align-items: center; justify-content: center; transition: 0.5s; }
+        .hidden { opacity: 0; pointer-events: none; }
+
+        @media(max-width: 900px) { .hud-container { grid-template-columns: 1fr; } body { overflow: auto; } }
+    </style>
 </head>
 <body>
-  <main class="card" role="main">
-    <div class="left">
-      <header>
-        <div class="logo" aria-hidden>IP</div>
-        <div>
-          <h1>IP Info</h1>
-          <p class="lead">Public IPv4 / IPv6, location & network details — rebuilt and improved.</p>
-        </div>
-      </header>
 
-      <div class="data" aria-live="polite">
-        <div class="item">
-          <span class="label">IPv4</span>
-          <div id="ipv4" class="value">—</div>
-        </div>
-        <div class="item">
-          <span class="label">IPv6</span>
-          <div id="ipv6" class="value">—</div>
-        </div>
-        <div class="item">
-          <span class="label">Country</span>
-          <div id="country" class="value">—</div>
-        </div>
-        <div class="item">
-          <span class="label">Region</span>
-          <div id="region" class="value">—</div>
-        </div>
-        <div class="item">
-          <span class="label">City</span>
-          <div id="city" class="value">—</div>
-        </div>
-        <div class="item">
-          <span class="label">ISP / Org</span>
-          <div id="isp" class="value">—</div>
-        </div>
-      </div>
+<canvas id="neural-link"></canvas>
 
-      <div class="controls">
-        <button id="refresh" title="Refresh data">Refresh</button>
-        <button id="copy-ip" title="Copy IPv4">Copy IPv4</button>
-        <button id="copy-ip6" title="Copy IPv6" class="secondary">Copy IPv6</button>
-        <button id="pin" class="secondary" title="Toggle map pin">Toggle Pin</button>
-      </div>
+<div id="loading" class="loading-overlay">
+    <div class="status-badge"><div class="pulse-dot"></div> Establishing Neural Link...</div>
+</div>
 
-      <div style="margin-top:12px" class="status">
-        <span class="dot" aria-hidden></span>
-        <span class="muted">Data fetched from public IP services • No keys required</span>
-      </div>
+<main class="hud-container" id="main-hud">
+    <section class="left">
+        <header>
+            <div>
+                <div class="status-badge"><div class="pulse-dot"></div> <span id="sys-status">Initializing</span></div>
+                <h1>Spartan HUD // 117-SYNC</h1>
+            </div>
+            <div class="bio-signs">
+                <div class="bio-label">Shield Integrity <span id="shield-val">100%</span></div>
+                <div class="bar-bg"><div id="shield-bar" class="bar-fill" style="width: 100%"></div></div>
+                <div class="bio-label">Neural Stress <span id="sync-val">12%</span></div>
+                <div class="bar-bg"><div id="sync-bar" class="bar-fill" style="width: 12%; background: #ff3e3e;"></div></div>
+            </div>
+        </header>
 
-      <footer class="note">Small privacy note: these services only return public-facing IP and coarse location data derived from ISP geolocation databases. If data is missing, it is normal.</footer>
-    </div>
+        <div class="data-grid">
+            <div class="data-node">
+                <span class="label">Uplink Address</span>
+                <div id="ipv4" class="value">...</div>
+            </div>
+            <div class="data-node">
+                <span class="label">Gateway Tunnel</span>
+                <div id="ipv6" class="value">...</div>
+            </div>
+            <div class="data-node">
+                <span class="label">Operational Theater</span>
+                <div id="location" class="value">...</div>
+            </div>
+            <div class="data-node">
+                <span class="label">Sector Designation</span>
+                <div id="sector-name" class="value">...</div>
+            </div>
+            <div class="data-node">
+                <span class="label">Comm Carrier</span>
+                <div id="isp" class="value">...</div>
+            </div>
+            <div class="data-node">
+                <span class="label">Signal Latency</span>
+                <div id="ping" class="value">...</div>
+            </div>
+        </div>
 
-    <aside class="right" aria-label="Map and extras">
-      <div class="map-wrap" id="mapWrap">
-        <div class="map-overlay" id="mapOverlay">Map • Loading…</div>
-        <iframe id="map" title="Map" srcdoc="<p style=\"color:#ddd;padding:12px;font-family:system-ui;\">Map unavailable in this preview. Enable JS to load map.</p>"></iframe>
-      </div>
+        <div class="terminal" id="term-logs">
+            [SYS] Booting UNSC-DIAG-OS...<br>
+            [SYS] Calibrating Neural Link...<br>
+        </div>
 
-      <div class="center muted">Want a JSON export? <button id="export" class="link-like">Download JSON</button></div>
-    </aside>
-  </main>
+        <div class="controls">
+            <button onclick="reboot()">Reboot Sys</button>
+            <button onclick="copyIP()">Extract IP</button>
+            <button onclick="downloadLog()">Log DUMP</button>
+        </div>
+    </section>
 
-  <script>
-    // Small utility functions
+    <section class="map-section">
+        <div class="map-frame">
+            <div class="map-overlay-text">
+                TRACKING_ID: 117-S<br>
+                ALT: 24.5m<br>
+                VEL: 0.0m/s
+            </div>
+            <iframe id="map" title="Tactical Map" src=""></iframe>
+        </div>
+    </section>
+</main>
+
+<script>
     const el = id => document.getElementById(id);
-    const set = (id, v) => { const n = el(id); if(n) n.textContent = v ?? '—'; };
 
-    async function fetchJson(url){
-      try{ const r = await fetch(url, {cache:'no-store'}); if(!r.ok) throw new Error('bad'); return await r.json(); }
-      catch(e){ return null }
+    const canvas = el('neural-link');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function initNeural() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        particles = Array.from({length: 50}, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: (Math.random() - 0.5) * 0.4
+        }));
     }
 
-    async function updateAll(){
-      set('ipv4','Loading...'); set('ipv6','Loading...'); set('country','Loading...'); set('region','Loading...'); set('city','Loading...'); set('isp','Loading...');
-
-      // IPv4
-      const ip4 = await fetchJson('https://api.ipify.org?format=json');
-      if(ip4 && ip4.ip) set('ipv4', ip4.ip); else set('ipv4','Unavailable');
-
-      // IPv6 (api64)
-      const ip6 = await fetchJson('https://api64.ipify.org?format=json');
-      if(ip6 && ip6.ip) set('ipv6', ip6.ip); else set('ipv6','Unavailable');
-
-      // location data — prefer ipapi.co (CORS friendly) but fallback
-      let loc = await fetchJson('https://ipapi.co/json/');
-      if(!loc){
-        // fallback to ipwho.is
-        const ipw = await fetchJson('https://ipwho.is/');
-        if(ipw && ipw.success) loc = ipw;
-      }
-
-      if(loc){
-        set('country', loc.country_name || loc.country || '—');
-        set('region', loc.region || loc.region_name || loc.region_code || '-');
-        set('city', loc.city || '-');
-        set('isp', loc.org || loc.connection?.isp || loc.isp || '-');
-
-        const lat = loc.latitude ?? loc.lat ?? loc.location?.latitude;
-        const lon = loc.longitude ?? loc.lon ?? loc.lng ?? loc.location?.longitude;
-
-        loadMap(lat, lon);
-      } else {
-        set('country','Unavailable'); set('region','-'); set('city','-'); set('isp','-');
-        document.getElementById('mapOverlay').textContent = 'Location unavailable';
-      }
+    function drawNeural() {
+        ctx.clearRect(0,0,canvas.width, canvas.height);
+        ctx.strokeStyle = 'rgba(0, 255, 200, 0.1)';
+        particles.forEach((p, i) => {
+            p.x += p.vx; p.y += p.vy;
+            if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
+            if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
+            particles.slice(i+1).forEach(p2 => {
+                let d = Math.hypot(p.x-p2.x, p.y-p2.y);
+                if(d < 180) {
+                    ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+                }
+            });
+        });
+        requestAnimationFrame(drawNeural);
     }
 
-    function loadMap(lat,lon){
-      const iframe = document.getElementById('map');
-      const overlay = document.getElementById('mapOverlay');
-      if(!lat || !lon){ overlay.textContent = 'No coordinates to show'; return }
-      overlay.textContent = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
-
-      // Use OpenStreetMap embed (no API key) with a small marker via URL
-      const z = 10;
-      const src = `https://www.openstreetmap.org/export/embed.html?bbox=${lon-0.05}%2C${lat-0.05}%2C${lon+0.05}%2C${lat+0.05}&layer=mapnik&marker=${lat}%2C${lon}`;
-      iframe.src = src;
-
-      // once map loads, remove overlay after short delay
-      iframe.onload = () => {
-        setTimeout(()=>{overlay.style.display='none'},600);
-      };
-      iframe.onerror = () => { overlay.textContent = 'Failed to load map'; }
+    function log(msg) {
+        const term = el('term-logs');
+        const line = document.createElement('div');
+        line.innerHTML = `> [${new Date().toLocaleTimeString()}] ${msg}`;
+        term.appendChild(line);
+        term.scrollTop = term.scrollHeight;
+        if(term.childNodes.length > 8) term.removeChild(term.firstChild);
     }
 
-    // copy helpers
-    document.getElementById('copy-ip').addEventListener('click', ()=>{
-      const v = document.getElementById('ipv4').textContent;
-      navigator.clipboard?.writeText(v).then(()=>{alert('IPv4 copied: '+v)}, ()=>{prompt('Copy IPv4', v)});
-    });
-    document.getElementById('copy-ip6').addEventListener('click', ()=>{
-      const v = document.getElementById('ipv6').textContent;
-      navigator.clipboard?.writeText(v).then(()=>{alert('IPv6 copied: '+v)}, ()=>{prompt('Copy IPv6', v)});
-    });
+    setInterval(() => {
+        const shield = 94 + Math.random() * 6;
+        el('shield-bar').style.width = shield + '%';
+        el('shield-val').textContent = Math.round(shield) + '%';
+        
+        const stress = 10 + Math.random() * 15;
+        el('sync-bar').style.width = stress + '%';
+        el('sync-val').textContent = Math.round(stress) + '%';
 
-    // refresh
-    document.getElementById('refresh').addEventListener('click', ()=>{ updateAll(); });
+        if(Math.random() > 0.95) {
+            el('main-hud').style.animation = 'glitch 0.2s linear';
+            log("NEURAL FLUX DETECTED");
+            setTimeout(() => el('main-hud').style.animation = '', 200);
+        }
+    }, 3000);
 
-    // export JSON
-    document.getElementById('export').addEventListener('click', ()=>{
-      const data = {
-        ipv4: document.getElementById('ipv4').textContent,
-        ipv6: document.getElementById('ipv6').textContent,
-        country: document.getElementById('country').textContent,
-        region: document.getElementById('region').textContent,
-        city: document.getElementById('city').textContent,
-        isp: document.getElementById('isp').textContent,
-        fetched: new Date().toISOString()
-      };
-      const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = 'ip-info.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-    });
+    async function updateData() {
+        el('loading').classList.remove('hidden');
+        el('sys-status').textContent = 'Syncing...';
+        log("SEARCHING FOR UPLINK...");
+        
+        const start = Date.now();
+        const [ip4, ip6] = await Promise.all([
+            fetch('https://api.ipify.org?format=json').then(r => r.json()),
+            fetch('https://api64.ipify.org?format=json').then(r => r.json()).catch(() => ({ip: 'NONE'}))
+        ]);
+        const pingTime = Date.now() - start;
 
-    // pin toggle (just toggles overlay visibility)
-    document.getElementById('pin').addEventListener('click', ()=>{
-      const ov = document.getElementById('mapOverlay'); ov.style.display = (ov.style.display==='none')? 'block':'none';
-    });
+        let loc = await fetch('https://ipapi.co/json/').then(r => r.json()).catch(() => null);
+        if(!loc?.latitude) {
+            const f = await fetch('https://ipwho.is/').then(r => r.json());
+            loc = { country_name: f.country, city: f.city, region: f.region, org: f.connection?.isp, latitude: f.latitude, longitude: f.longitude };
+        }
 
-    // init
-    updateAll();
+        el('ipv4').textContent = ip4.ip;
+        el('ipv6').textContent = ip6.ip;
+        el('ping').textContent = `${pingTime}ms // SECURE`;
 
-    // progressive enhancement: if framed or previewed, show a helpful title in the iframe via srcdoc fallback
-  </script>
+        if(loc) {
+            el('location').textContent = loc.country_name;
+            el('sector-name').textContent = `${loc.city}, ${loc.region}`;
+            el('isp').textContent = loc.org;
+            const off = 0.02;
+            el('map').src = `https://www.openstreetmap.org/export/embed.html?bbox=${loc.longitude-off},${loc.latitude-off},${loc.longitude+off},${loc.latitude+off}&layer=mapnik&marker=${loc.latitude},${loc.longitude}`;
+            log("UPLINK SECURED. SECTOR IDENTIFIED.");
+        }
+
+        el('sys-status').textContent = 'Tactical Ready';
+        setTimeout(() => el('loading').classList.add('hidden'), 1000);
+    }
+
+    function reboot() {
+        log("INITIATING SYSTEM REBOOT...");
+        updateData();
+    }
+
+    function copyIP() {
+        navigator.clipboard.writeText(el('ipv4').textContent);
+        log("IP DATA EXTRACTED TO CLIPBOARD.");
+    }
+
+    function downloadLog() {
+        const blob = new Blob([el('term-logs').innerText], {type: 'text/plain'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'unsc_diag.log';
+        a.click();
+        log("ARCHIVING SYSTEM LOGS...");
+    }
+
+    window.onresize = initNeural;
+    window.onload = () => { initNeural(); drawNeural(); updateData(); };
+</script>
+
 </body>
 </html>
