@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Big Reveal Countdown</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Using Inter as a high-quality geometric sans-serif for a premium corporate aesthetic */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+        :root {
+            /* Brand Inspired Palette */
+            --brand-primary: #003359;
+            --brand-accent-sky: #00a3e0;
+            --brand-accent-green: #8ec641;
+            --brand-white: #ffffff;
+            --brand-dark-gray: #2d2d2d;
+        }
+
+        body {
+            /* Clean, modern font stack */
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--brand-white);
+            color: var(--brand-primary);
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .reveal-container {
+            text-align: center;
+            z-index: 10;
+        }
+
+        .top-label {
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--brand-dark-gray);
+            margin-bottom: 2.5rem;
+            opacity: 0.8;
+        }
+
+        .timer-grid {
+            display: flex;
+            gap: 2.5rem;
+            justify-content: center;
+            align-items: baseline;
+        }
+
+        .timer-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 100px;
+        }
+
+        .timer-value {
+            font-size: clamp(3.5rem, 12vw, 8rem);
+            font-weight: 800;
+            line-height: 0.9;
+            color: var(--brand-primary);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timer-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 0.75rem;
+            color: var(--brand-accent-green);
+            font-weight: 600;
+        }
+
+        #fireworks-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+            display: none;
+        }
+
+        .final-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--brand-primary);
+            color: white;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            text-align: center;
+        }
+
+        .final-message h1 {
+            font-size: clamp(2.5rem, 10vw, 6rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        @media (max-width: 768px) {
+            .timer-grid { gap: 1rem; }
+            .timer-item { min-width: 70px; }
+            .timer-value { font-size: 2.8rem; }
+            .timer-label { font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="fireworks-canvas"></canvas>
+
+    <div id="main-content" class="reveal-container">
+        <div class="top-label">The Anticipation of the Major Revelation</div>
+        
+        <div class="timer-grid">
+            <div class="timer-item">
+                <span id="days" class="timer-value">00</span>
+                <span class="timer-label">Days</span>
+            </div>
+            <div class="timer-item">
+                <span id="hours" class="timer-value">00</span>
+                <span class="timer-label">Hours</span>
+            </div>
+            <div class="timer-item">
+                <span id="minutes" class="timer-value">00</span>
+                <span class="timer-label">Minutes</span>
+            </div>
+            <div class="timer-item">
+                <span id="seconds" class="timer-value">00</span>
+                <span class="timer-label">Seconds</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="final-screen" class="final-message">
+        <h1>Is it finally real??</h1>
+    </div>
+
+    <script>
+        // Target: April 30, 2026, 11:59 PM AST (UTC+3)
+        const targetDate = new Date("2026-04-30T23:59:00+03:00").getTime();
+        
+        const elements = {
+            days: document.getElementById('days'),
+            hours: document.getElementById('hours'),
+            minutes: document.getElementById('minutes'),
+            seconds: document.getElementById('seconds'),
+            main: document.getElementById('main-content'),
+            final: document.getElementById('final-screen'),
+            canvas: document.getElementById('fireworks-canvas')
+        };
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const diff = targetDate - now;
+
+            if (diff <= 0) {
+                triggerReveal();
+                return;
+            }
+
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+            elements.days.innerText = String(d).padStart(2, '0');
+            elements.hours.innerText = String(h).padStart(2, '0');
+            elements.minutes.innerText = String(m).padStart(2, '0');
+            elements.seconds.innerText = String(s).padStart(2, '0');
+        }
+
+        function triggerReveal() {
+            clearInterval(timerInterval);
+            elements.main.style.display = 'none';
+            elements.final.style.display = 'flex';
+            elements.canvas.style.display = 'block';
+            initFireworks();
+        }
+
+        const timerInterval = setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        function initFireworks() {
+            const ctx = elements.canvas.getContext('2d');
+            let particles = [];
+            
+            function resize() {
+                elements.canvas.width = window.innerWidth;
+                elements.canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            class Particle {
+                constructor(x, y, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.color = color;
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 6 + 2;
+                    this.vx = Math.cos(angle) * speed;
+                    this.vy = Math.sin(angle) * speed;
+                    this.alpha = 1;
+                    this.gravity = 0.05;
+                }
+                update() {
+                    this.vx *= 0.98;
+                    this.vy *= 0.98;
+                    this.vy += this.gravity;
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.alpha -= 0.012;
+                }
+                draw() {
+                    ctx.globalAlpha = this.alpha;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                }
+            }
+
+            function fire() {
+                const x = Math.random() * elements.canvas.width;
+                const y = Math.random() * (elements.canvas.height * 0.6);
+                const colors = ['#8ec641', '#00a3e0', '#ffffff'];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                for(let i=0; i<50; i++) particles.push(new Particle(x, y, color));
+            }
+
+            function loop() {
+                ctx.fillStyle = 'rgba(0, 51, 89, 0.15)';
+                ctx.fillRect(0, 0, elements.canvas.width, elements.canvas.height);
+                if(Math.random() < 0.08) fire();
+                particles = particles.filter(p => p.alpha > 0);
+                particles.forEach(p => { p.update(); p.draw(); });
+                requestAnimationFrame(loop);
+            }
+            loop();
+        }
+    </script>
+</body>
+</html>
