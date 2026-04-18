@@ -78,6 +78,14 @@ h2 {
     background-color: #00ffc8;
 }
 
+#brand:hover {
+    color: #8ec641;
+    background-color: #003359;
+}
+#brand {
+    font-size: 16px;
+}
+
 .collapsible {
     background-color: #3a3a3a;
     color: white;
