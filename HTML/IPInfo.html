@@ -4,54 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UNSC Network Diagnostics</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Added Orbitron for that heavy UNSC aesthetic -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #030508;
             --accent: #00ffc8;
+            --accent-2: #80fff0;
             --accent-glow: rgba(0, 255, 200, 0.2);
-            --card: rgba(8, 12, 16, 0.9);
-            --muted: #5a6b6b;
-            --border: rgba(0, 255, 200, 0.25);
-            --radius: 2px;
+            --danger: #ff3e3e;
+            --warning: #ffd166;
+            --card: rgba(6, 10, 14, 0.95);
+            --muted: #607676;
+            --border: rgba(0, 255, 200, 0.35);
+            --border-soft: rgba(0, 255, 200, 0.15);
+            --radius: 0px;
         }
 
-        * { box-sizing: border-box; cursor: crosshair; }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
             min-height: 100vh;
             font-family: 'Space Grotesk', system-ui, sans-serif;
-            background: var(--bg);
+            background:
+                radial-gradient(circle at top left, rgba(0, 255, 200, 0.08), transparent 30%),
+                radial-gradient(circle at bottom right, rgba(0, 255, 200, 0.05), transparent 35%),
+                var(--bg);
             display: flex;
             justify-content: center;
             align-items: center;
             color: #e9ffff;
             padding: 20px;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         #neural-link {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
-            opacity: 0.3;
-        }
-
-        @keyframes glitch {
-            0% { transform: translate(0) }
-            20% { transform: translate(-2px, 2px) }
-            40% { transform: translate(-2px, -2px) }
-            60% { transform: translate(2px, 2px) }
-            80% { transform: translate(2px, -2px) }
-            100% { transform: translate(0) }
+            opacity: 0.28;
         }
 
         @keyframes scan {
             0% { top: 0%; opacity: 0; }
-            5% { opacity: 0.2; }
-            95% { opacity: 0.2; }
+            5% { opacity: 0.18; }
+            95% { opacity: 0.18; }
             100% { top: 100%; opacity: 0; }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 255, 200, 0.5); }
+            70% { opacity: 0.65; box-shadow: 0 0 0 8px rgba(0, 255, 200, 0); }
+            100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 255, 200, 0); }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.35; }
         }
 
         .hud-container {
@@ -62,135 +72,227 @@
             border: 2px solid var(--border);
             padding: 30px;
             display: grid;
-            grid-template-columns: 1fr 400px;
+            grid-template-columns: minmax(0, 1fr) 400px;
             gap: 30px;
             box-shadow: inset 0 0 100px rgba(0, 255, 200, 0.05), 0 0 50px rgba(0,0,0,1);
             position: relative;
             overflow: hidden;
+            /* Subtly clip the main container corners too */
+            clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
         }
 
-        /* The moving scan line */
         .hud-container::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: var(--accent);
-            box-shadow: 0 0 15px var(--accent);
-            z-index: 5;
-            pointer-events: none;
-            animation: scan 8s linear infinite;
+            content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: var(--accent); box-shadow: 0 0 15px var(--accent);
+            z-index: 5; pointer-events: none; animation: scan 9s linear infinite;
         }
 
-        /* CRT Static Overlay */
         .hud-container::before {
-            content: " ";
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 255, 0, 0.06));
-            z-index: 2;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
+            content: ""; position: absolute; inset: 0;
+            background:
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.20) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.035), rgba(0, 255, 0, 0.015), rgba(0, 255, 0, 0.035));
+            z-index: 2; background-size: 100% 2px, 3px 100%; pointer-events: none;
         }
+
+        .left, .map-section { position: relative; z-index: 3; }
 
         header {
-            border-bottom: 1px solid var(--border);
+            border-bottom: 2px solid var(--border);
             padding-bottom: 20px;
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
+            gap: 20px;
         }
 
         .status-badge {
-            padding: 4px 12px;
+            padding: 6px 14px;
             background: var(--accent-glow);
             color: var(--accent);
             border: 1px solid var(--accent);
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 2px;
+            font-family: 'Orbitron', sans-serif;
             font-weight: 700;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
         }
 
         .pulse-dot {
-            width: 6px;
-            height: 6px;
-            background: var(--accent);
-            border-radius: 50%;
-            animation: pulse 1s infinite;
+            width: 6px; height: 6px; background: var(--accent); border-radius: 50%;
+            animation: pulse 1.4s infinite;
         }
 
-        @keyframes pulse { 0% { opacity: 1 } 50% { opacity: 0.3 } 100% { opacity: 1 } }
+        .bio-signs { width: 180px; min-width: 180px; }
+        .bio-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.55rem; color: var(--muted); text-transform: uppercase;
+            display: flex; justify-content: space-between; margin-bottom: 4px;
+            letter-spacing: 1px;
+        }
+        .bar-bg { height: 6px; background: rgba(255, 255, 255, 0.05); margin-bottom: 10px; overflow: hidden; border: 1px solid rgba(0,255,200,0.1); }
+        .bar-fill { height: 100%; background: var(--accent); box-shadow: 0 0 15px var(--accent); transition: width 0.35s ease; }
 
-        .bio-signs { width: 180px; }
-        .bio-label { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; display: flex; justify-content: space-between; margin-bottom: 2px; }
-        .bar-bg { height: 6px; background: rgba(255, 255, 255, 0.05); margin-bottom: 10px; }
-        .bar-fill { height: 100%; background: var(--accent); box-shadow: 0 0 15px var(--accent); transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        h1 {
+            margin: 10px 0 0;
+            font-size: clamp(1.35rem, 3vw, 1.8rem);
+            letter-spacing: -1px;
+            text-transform: uppercase;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            text-shadow: 0 0 10px rgba(0, 255, 200, 0.3);
+        }
 
-        h1 { margin: 10px 0; font-size: 1.8rem; letter-spacing: -1px; text-transform: uppercase; }
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 15px;
+        }
 
-        .data-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; font-family: 'JetBrains Mono', monospace; }
-        .data-node { 
-            background: rgba(0, 255, 200, 0.02); 
-            border: 1px solid rgba(0, 255, 200, 0.05); 
-            padding: 15px; 
-            position: relative; 
-            overflow: hidden;
+        .data-node {
+            min-height: 70px;
+            background: 
+                repeating-linear-gradient(
+                    0deg, transparent, transparent 2px,
+                    rgba(0, 255, 200, 0.03) 2px, rgba(0, 255, 200, 0.03) 4px
+                ),
+                rgba(6, 10, 14, 0.8);
+            border: 1px solid var(--border-soft);
+            border-left: 3px solid var(--accent);
+            padding: 15px;
+            position: relative;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            /* The Sci-Fi Cut */
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+            transition: all 0.2s ease;
         }
 
-        .label { display: block; font-size: 0.6rem; color: var(--muted); text-transform: uppercase; margin-bottom: 5px; }
-        .value { 
-            font-size: 0.9rem; 
-            color: var(--accent); 
-            text-shadow: 0 0 5px var(--accent-glow); 
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            word-break: break-all;
-            line-height: 1.2;
+        .data-node:hover {
+            background: 
+                repeating-linear-gradient(
+                    0deg, transparent, transparent 2px,
+                    rgba(0, 255, 200, 0.06) 2px, rgba(0, 255, 200, 0.06) 4px
+                ),
+                rgba(0, 255, 200, 0.05);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: inset 0 0 15px rgba(0, 255, 200, 0.1);
         }
+
+        .label {
+            display: block; font-size: 0.6rem; color: var(--muted); text-transform: uppercase;
+            margin-bottom: 7px; letter-spacing: 2px; font-family: 'Orbitron', sans-serif; font-weight: 700;
+        }
+
+        .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem; color: var(--accent); text-shadow: 0 0 5px var(--accent-glow);
+            word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; line-height: 1.28;
+        }
+
+        .value.muted { color: var(--muted); text-shadow: none; }
+        .value.warning { color: var(--warning); text-shadow: 0 0 5px rgba(255, 209, 102, 0.4); }
+        .value.danger { color: var(--danger); text-shadow: 0 0 5px rgba(255, 62, 62, 0.4); }
 
         .terminal {
-            margin-top: 20px;
-            height: 100px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid var(--border);
-            padding: 10px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.65rem;
-            color: var(--muted);
-            overflow-y: hidden;
-            position: relative;
+            margin-top: 20px; height: 132px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--border); border-left: 3px solid var(--accent);
+            padding: 10px 15px; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #789090;
+            overflow-y: auto; position: relative; scrollbar-width: thin;
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
         }
 
-        .controls { display: flex; gap: 10px; margin-top: 20px; }
-        button { background: transparent; border: 1px solid var(--border); padding: 10px 20px; color: #fff; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; transition: 0.3s; }
-        button:hover { background: var(--accent); color: #000; box-shadow: 0 0 20px var(--accent-glow); }
+        .terminal div { margin-bottom: 3px; }
+        .terminal .ok { color: var(--accent); }
+        .terminal .warn { color: var(--warning); }
+        .terminal .err { color: var(--danger); }
+        .terminal .cursor { animation: blink 1s steps(2, start) infinite; }
+
+        .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+
+        button {
+            background: rgba(0, 255, 200, 0.05);
+            border: 1px solid var(--border);
+            padding: 10px 18px; color: #fff; text-transform: uppercase; font-size: 0.7rem;
+            letter-spacing: 1px; transition: 0.1s ease;
+            font-family: 'Orbitron', sans-serif; font-weight: 700;
+            cursor: pointer;
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+        }
+
+        button:hover, button:focus-visible {
+            background: var(--accent); color: #000; box-shadow: 0 0 20px var(--accent-glow);
+            border-color: var(--accent); outline: none; transform: translateY(-1px);
+        }
+
+        button:active { transform: translateY(1px); box-shadow: none; }
+        button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
         .map-section { display: flex; flex-direction: column; gap: 10px; }
-        .map-frame { flex: 1; border: 1px solid var(--border); position: relative; min-height: 400px; }
-        #map { width: 100%; height: 100%; filter: invert(1) hue-rotate(130deg) brightness(0.6) contrast(1.2); opacity: 0.8; }
-        
-        .map-overlay-text {
-            position: absolute;
-            top: 10px; right: 10px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.6rem;
-            color: var(--accent);
-            text-align: right;
-            pointer-events: none;
-            z-index: 6;
+        .map-frame {
+            flex: 1; border: 1px solid var(--border); position: relative; min-height: 400px;
+            background:
+                linear-gradient(rgba(0, 255, 200, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 200, 0.04) 1px, transparent 1px),
+                rgba(0, 0, 0, 0.4);
+            background-size: 28px 28px; overflow: hidden;
+            clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
         }
 
-        .loading-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 999; display: flex; align-items: center; justify-content: center; transition: 0.5s; }
+        #map {
+            width: 100%; height: 100%; min-height: 400px; border: 0;
+            filter: invert(1) hue-rotate(130deg) brightness(0.6) contrast(1.4) sepia(0.2);
+            opacity: 0.82;
+        }
+
+        .map-placeholder {
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            text-align: center; padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+            color: var(--muted); background: rgba(0, 0, 0, 0.5); z-index: 4;
+        }
+
+        .map-placeholder.hidden { display: none; }
+
+        .map-overlay-text {
+            position: absolute; top: 10px; right: 10px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--accent);
+            text-align: right; pointer-events: none; z-index: 6;
+            background: rgba(3, 5, 8, 0.8); padding: 8px; border: 1px solid var(--border-soft);
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+        }
+
+        .loading-overlay {
+            position: fixed; inset: 0; background: var(--bg); z-index: 999;
+            display: flex; align-items: center; justify-content: center; transition: 0.5s ease;
+        }
+
         .hidden { opacity: 0; pointer-events: none; }
 
-        @media(max-width: 900px) { .hud-container { grid-template-columns: 1fr; } body { overflow: auto; } }
+        @media(max-width: 900px) {
+            body { align-items: flex-start; padding: 12px; }
+            .hud-container { grid-template-columns: 1fr; padding: 20px; gap: 20px; clip-path: none; }
+            header { flex-direction: column; }
+            .bio-signs { width: 100%; min-width: 0; }
+            .map-frame, #map { min-height: 320px; }
+        }
+
+        @media(max-width: 560px) {
+            .data-grid { grid-template-columns: 1fr; }
+            button { flex: 1 1 calc(50% - 10px); padding-inline: 10px; }
+            .terminal { height: 160px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .hud-container::after, .pulse-dot, .terminal .cursor { animation: none; }
+        }
     </style>
 </head>
 <body>
@@ -209,66 +311,121 @@
                 <h1>Spartan HUD // 117-SYNC</h1>
             </div>
             <div class="bio-signs">
-                <div class="bio-label">Shield Integrity <span id="shield-val">100%</span></div>
-                <div class="bar-bg"><div id="shield-bar" class="bar-fill" style="width: 100%"></div></div>
-                <div class="bio-label">Neural Stress <span id="sync-val">12%</span></div>
-                <div class="bar-bg"><div id="sync-bar" class="bar-fill" style="width: 12%; background: #ff3e3e;"></div></div>
+                <div class="bio-label">Shield Integrity <span id="shield-val">0%</span></div>
+                <div class="bar-bg"><div id="shield-bar" class="bar-fill" style="width: 0%"></div></div>
+                <div class="bio-label">Neural Stress <span id="sync-val">0%</span></div>
+                <div class="bar-bg"><div id="sync-bar" class="bar-fill" style="width: 0%; background: #ff3e3e; box-shadow: 0 0 15px #ff3e3e;"></div></div>
             </div>
         </header>
 
         <div class="data-grid">
-            <div class="data-node">
+            <div class="data-node" onmouseenter="snd.hover()">
                 <span class="label">Uplink Address</span>
-                <div id="ipv4" class="value">...</div>
+                <div id="ipv4" class="value muted">...</div>
             </div>
-            <div class="data-node">
+            <div class="data-node" onmouseenter="snd.hover()">
                 <span class="label">Gateway Tunnel</span>
-                <div id="ipv6" class="value">...</div>
+                <div id="ipv6" class="value muted">...</div>
             </div>
-            <div class="data-node">
+            <div class="data-node" onmouseenter="snd.hover()">
                 <span class="label">Operational Theater</span>
-                <div id="location" class="value">...</div>
+                <div id="location" class="value muted">...</div>
             </div>
-            <div class="data-node">
+            <div class="data-node" onmouseenter="snd.hover()">
                 <span class="label">Sector Designation</span>
-                <div id="sector-name" class="value">...</div>
+                <div id="sector-name" class="value muted">...</div>
             </div>
-            <div class="data-node">
+            <div class="data-node" onmouseenter="snd.hover()">
                 <span class="label">Comm Carrier</span>
-                <div id="isp" class="value">...</div>
+                <div id="isp" class="value muted">...</div>
             </div>
-            <div class="data-node">
+            <div class="data-node" onmouseenter="snd.hover()">
                 <span class="label">Signal Latency</span>
-                <div id="ping" class="value">...</div>
+                <div id="ping" class="value muted">...</div>
             </div>
         </div>
 
         <div class="terminal" id="term-logs">
-            [SYS] Booting UNSC-DIAG-OS...<br>
-            [SYS] Calibrating Neural Link...<br>
+            <div>[SYS] Booting UNSC-DIAG-OS...</div>
+            <div>[SYS] Calibrating Neural Link...</div>
+            <div class="cursor">> _</div>
         </div>
 
         <div class="controls">
-            <button onclick="reboot()">Reboot Sys</button>
-            <button onclick="copyIP()">Extract IP</button>
-            <button onclick="downloadLog()">Log DUMP</button>
+            <button onmouseenter="snd.hover()" onclick="snd.click(); reboot()">Reboot Sys</button>
+            <button onmouseenter="snd.hover()" onclick="snd.click(); copyIP()">Extract IP</button>
+            <button onmouseenter="snd.hover()" onclick="snd.click(); downloadLog()">Log DUMP</button>
+            <button onmouseenter="snd.hover()" onclick="snd.click(); runPingTest(true)">Ping Test</button>
         </div>
     </section>
 
     <section class="map-section">
         <div class="map-frame">
-            <div class="map-overlay-text">
+            <div class="map-overlay-text" id="map-overlay">
                 TRACKING_ID: 117-S<br>
-                ALT: 24.5m<br>
-                VEL: 0.0m/s
+                ALT: N/A<br>
+                VEL: N/A
             </div>
-            <iframe id="map" title="Tactical Map" src=""></iframe>
+            <div id="map-placeholder" class="map-placeholder">Awaiting valid coordinates from IP location provider...</div>
+            <iframe id="map" title="Tactical Map" src="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
     </section>
 </main>
 
 <script>
     const el = id => document.getElementById(id);
+
+    // --- ONBOARD SYNTHESIZER (WEB AUDIO API) ---
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let actx = null;
+
+    const snd = {
+        init: () => { if (!actx) actx = new AudioContext(); if (actx.state === 'suspended') actx.resume(); },
+        play: (type) => {
+            if (!actx) return;
+            const osc = actx.createOscillator();
+            const gain = actx.createGain();
+            osc.connect(gain);
+            gain.connect(actx.destination);
+            const now = actx.currentTime;
+
+            if (type === 'hover') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(1000, now + 0.05);
+                gain.gain.setValueAtTime(0.02, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                osc.start(now); osc.stop(now + 0.05);
+            } else if (type === 'click') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.exponentialRampToValueAtTime(50, now + 0.1);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                osc.start(now); osc.stop(now + 0.1);
+            } else if (type === 'log') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(1200, now);
+                osc.frequency.setValueAtTime(1800, now + 0.02);
+                gain.gain.setValueAtTime(0.01, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+                osc.start(now); osc.stop(now + 0.04);
+            }
+        },
+        hover: () => { snd.init(); snd.play('hover'); },
+        click: () => { snd.init(); snd.play('click'); },
+        logMsg: () => { snd.init(); snd.play('log'); }
+    };
+
+    // User must interact with the document first to enable audio policies
+    document.body.addEventListener('click', snd.init, { once: true });
+    document.body.addEventListener('mousemove', snd.init, { once: true });
+
+
+    const state = {
+        ipv4: null, ipv6: null, location: null, lookupMs: null,
+        pingResults: [], provider: null, errors: []
+    };
 
     const canvas = el('neural-link');
     const ctx = canvas.getContext('2d');
@@ -280,21 +437,21 @@
         particles = Array.from({length: 50}, () => ({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height,
-            vx: (Math.random() - 0.5) * 0.4,
-            vy: (Math.random() - 0.5) * 0.4
+            vx: (Math.random() - 0.5) * 0.35,
+            vy: (Math.random() - 0.5) * 0.35
         }));
     }
 
     function drawNeural() {
-        ctx.clearRect(0,0,canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.strokeStyle = 'rgba(0, 255, 200, 0.1)';
         particles.forEach((p, i) => {
             p.x += p.vx; p.y += p.vy;
-            if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
-            if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
-            particles.slice(i+1).forEach(p2 => {
-                let d = Math.hypot(p.x-p2.x, p.y-p2.y);
-                if(d < 180) {
+            if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+            if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+            particles.slice(i + 1).forEach(p2 => {
+                const d = Math.hypot(p.x - p2.x, p.y - p2.y);
+                if (d < 180) {
                     ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
                 }
             });
@@ -302,86 +459,352 @@
         requestAnimationFrame(drawNeural);
     }
 
-    function log(msg) {
-        const term = el('term-logs');
-        const line = document.createElement('div');
-        line.innerHTML = `> [${new Date().toLocaleTimeString()}] ${msg}`;
-        term.appendChild(line);
-        term.scrollTop = term.scrollHeight;
-        if(term.childNodes.length > 8) term.removeChild(term.firstChild);
+    function setValue(id, value, mode = 'normal') {
+        const node = el(id);
+        const safe = value === undefined || value === null || value === '' ? 'Unavailable' : String(value);
+        node.textContent = safe;
+        node.className = 'value' + (mode === 'muted' ? ' muted' : mode === 'warning' ? ' warning' : mode === 'danger' ? ' danger' : '');
     }
 
-    setInterval(() => {
-        const shield = 94 + Math.random() * 6;
-        el('shield-bar').style.width = shield + '%';
-        el('shield-val').textContent = Math.round(shield) + '%';
-        
-        const stress = 10 + Math.random() * 15;
-        el('sync-bar').style.width = stress + '%';
-        el('sync-val').textContent = Math.round(stress) + '%';
+    function clearCursor() {
+        const term = el('term-logs');
+        const cursor = term.querySelector('.cursor');
+        if (cursor) cursor.remove();
+    }
 
-        if(Math.random() > 0.95) {
-            el('main-hud').style.animation = 'glitch 0.2s linear';
-            log("NEURAL FLUX DETECTED");
-            setTimeout(() => el('main-hud').style.animation = '', 200);
+    function addCursor() {
+        const term = el('term-logs');
+        const existing = term.querySelector('.cursor');
+        if (existing) existing.remove();
+        const cursor = document.createElement('div');
+        cursor.className = 'cursor'; cursor.textContent = '> _';
+        term.appendChild(cursor);
+        term.scrollTop = term.scrollHeight;
+    }
+
+    function log(msg, type = '') {
+        const term = el('term-logs');
+        clearCursor();
+        const line = document.createElement('div');
+        if (type) line.className = type;
+        line.textContent = `> [${new Date().toLocaleTimeString()}] ${msg}`;
+        term.appendChild(line);
+        const maxLines = 18;
+        while (term.children.length > maxLines) term.removeChild(term.firstElementChild);
+        addCursor();
+        snd.logMsg(); // Trigger audio blip on log
+    }
+
+    function withTimeout(ms = 6000) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), ms);
+        return { controller, timer };
+    }
+
+    async function fetchJSON(url, timeout = 6000) {
+        const separator = url.includes('?') ? '&' : '?';
+        const target = `${url}${separator}_=${Date.now()}`;
+        const { controller, timer } = withTimeout(timeout);
+        try {
+            const response = await fetch(target, { cache: 'no-store', signal: controller.signal, headers: { 'Accept': 'application/json' } });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return await response.json();
+        } finally {
+            clearTimeout(timer);
         }
-    }, 3000);
+    }
+
+    function asNumber(value) {
+        const n = Number(value); return Number.isFinite(n) ? n : null;
+    }
+
+    function clean(value) {
+        if (value === undefined || value === null) return null;
+        const text = String(value).trim();
+        if (!text || text.toLowerCase() === 'undefined' || text.toLowerCase() === 'null') return null;
+        return text;
+    }
+
+    function joinClean(parts, fallback = 'Unavailable') {
+        const out = parts.map(clean).filter(Boolean);
+        return out.length ? out.join(', ') : fallback;
+    }
+
+    function normalizeIpapi(raw) {
+        const asnText = clean(raw.asn) || clean(raw.asn_org);
+        const ispText = joinClean([raw.org, asnText], 'Unavailable');
+        return {
+            provider: 'ipapi.co', ip: clean(raw.ip), country: clean(raw.country_name),
+            region: clean(raw.region), city: clean(raw.city), timezone: clean(raw.timezone),
+            isp: ispText, asn: asnText, latitude: asNumber(raw.latitude), longitude: asNumber(raw.longitude)
+        };
+    }
+
+    function normalizeIpwho(raw) {
+        const asn = clean(raw.connection?.asn ? `AS${raw.connection.asn}` : raw.asn);
+        const ispText = joinClean([raw.connection?.isp, raw.connection?.org, asn], 'Unavailable');
+        return {
+            provider: 'ipwho.is', ip: clean(raw.ip), country: clean(raw.country),
+            region: clean(raw.region), city: clean(raw.city), timezone: clean(raw.timezone?.id || raw.timezone),
+            isp: ispText, asn, latitude: asNumber(raw.latitude), longitude: asNumber(raw.longitude)
+        };
+    }
+
+    function normalizeGeojs(raw) {
+        const asn = clean(raw.asn ? `AS${raw.asn}` : raw.asn);
+        const ispText = joinClean([raw.organization_name, raw.organization, asn], 'Unavailable');
+        return {
+            provider: 'GeoJS', ip: clean(raw.ip), country: clean(raw.country),
+            region: clean(raw.region), city: clean(raw.city), timezone: clean(raw.timezone),
+            isp: ispText, asn, latitude: asNumber(raw.latitude), longitude: asNumber(raw.longitude)
+        };
+    }
+
+    const geoProviders = [
+        {
+            name: 'GeoJS',
+            url: () => state.ipv4 ? `https://get.geojs.io/v1/ip/geo/${encodeURIComponent(state.ipv4)}.json` : 'https://get.geojs.io/v1/ip/geo.json',
+            normalize: normalizeGeojs,
+            usable: data => Boolean(data) && (data.country || data.city || data.region || data.latitude || data.longitude || data.organization_name)
+        },
+        {
+            name: 'ipapi.co',
+            url: () => state.ipv4 ? `https://ipapi.co/${encodeURIComponent(state.ipv4)}/json/` : 'https://ipapi.co/json/',
+            normalize: normalizeIpapi,
+            usable: data => !data.error && (data.country_name || data.city || data.region || data.latitude || data.longitude || data.org)
+        },
+        {
+            name: 'ipwho.is',
+            url: () => state.ipv4 ? `https://ipwho.is/${encodeURIComponent(state.ipv4)}` : 'https://ipwho.is/',
+            normalize: normalizeIpwho,
+            usable: data => data.success !== false && (data.country || data.city || data.region || data.latitude || data.longitude || data.connection?.isp)
+        }
+    ];
+
+    async function getLocation() {
+        for (const provider of geoProviders) {
+            try {
+                const url = typeof provider.url === 'function' ? provider.url() : provider.url;
+                log(`QUERY LOCATION PROVIDER: ${provider.name}`);
+                const raw = await fetchJSON(url, 6500);
+                if (!provider.usable(raw)) throw new Error(raw.reason || raw.message || 'No usable location fields');
+                const normalized = provider.normalize(raw);
+                const hasAnything = normalized.country || normalized.region || normalized.city || normalized.latitude || normalized.longitude;
+                if (!hasAnything) throw new Error('Location fields empty');
+                state.provider = provider.name;
+                return normalized;
+            } catch (err) {
+                const message = `${provider.name} failed: ${err.message}`;
+                state.errors.push(message);
+                log(message, 'warn');
+            }
+        }
+        return null;
+    }
+
+    function hashId(input) {
+        const text = input || '117-S'; let hash = 0;
+        for (let i = 0; i < text.length; i++) hash = ((hash << 5) - hash) + text.charCodeAt(i) | 0;
+        return Math.abs(hash).toString(16).toUpperCase().slice(0, 6).padStart(6, '0');
+    }
+
+    function updateBars() {
+        const loc = state.location || {};
+        const checks = [
+            Boolean(state.ipv4), Boolean(state.ipv6), Boolean(loc.country),
+            Boolean(loc.city || loc.region), Boolean(loc.isp), Number.isFinite(loc.latitude) && Number.isFinite(loc.longitude)
+        ];
+        const integrity = Math.round((checks.filter(Boolean).length / checks.length) * 100);
+        const stress = Math.max(0, Math.min(100, Math.round(((state.lookupMs || 0) / 2000) * 100)));
+
+        el('shield-bar').style.width = `${integrity}%`;
+        el('shield-val').textContent = `${integrity}%`;
+        el('sync-bar').style.width = `${stress}%`;
+        el('sync-val').textContent = `${stress}%`;
+    }
+
+    function updateMap(loc) {
+        const map = el('map');
+        const placeholder = el('map-placeholder');
+        const overlay = el('map-overlay');
+        const hasCoords = loc && Number.isFinite(loc.latitude) && Number.isFinite(loc.longitude);
+
+        overlay.innerHTML = `TRACKING_ID: ${hashId(state.ipv4 || state.ipv6)}<br>ALT: N/A<br>VEL: N/A`;
+
+        if (!hasCoords) {
+            map.removeAttribute('src');
+            placeholder.textContent = 'Map unavailable. The location provider did not return valid coordinates.';
+            placeholder.classList.remove('hidden');
+            return;
+        }
+
+        const span = 0.05;
+        const lat = loc.latitude;
+        const lon = loc.longitude;
+        map.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lon - span},${lat - span},${lon + span},${lat + span}&layer=mapnik&marker=${lat},${lon}`;
+        placeholder.classList.add('hidden');
+    }
+
+    async function detectIPs() {
+        const [ip4Result, ip6Result] = await Promise.allSettled([
+            fetchJSON('https://api.ipify.org?format=json', 5000),
+            fetchJSON('https://api6.ipify.org?format=json', 5000)
+        ]);
+
+        if (ip4Result.status === 'fulfilled' && ip4Result.value?.ip) {
+            state.ipv4 = ip4Result.value.ip;
+        } else { state.errors.push('IPv4 lookup failed'); }
+
+        if (ip6Result.status === 'fulfilled' && ip6Result.value?.ip) {
+            state.ipv6 = ip6Result.value.ip;
+        } else { state.ipv6 = null; state.errors.push('IPv6 not detected or API unreachable'); }
+    }
+
+    function renderData() {
+        const loc = state.location;
+
+        setValue('ipv4', state.ipv4 || 'Unavailable', state.ipv4 ? 'normal' : 'warning');
+        setValue('ipv6', state.ipv6 || 'Not detected', state.ipv6 ? 'normal' : 'warning');
+        setValue('ping', state.lookupMs ? `${state.lookupMs}ms // HTTP LOOKUP` : 'Unavailable', state.lookupMs ? 'normal' : 'warning');
+
+        if (loc) {
+            setValue('location', joinClean([loc.country], 'Location unavailable'), loc.country ? 'normal' : 'warning');
+            setValue('sector-name', joinClean([loc.city, loc.region, loc.timezone], 'Unknown sector'), (loc.city || loc.region) ? 'normal' : 'warning');
+            setValue('isp', loc.isp || 'Unavailable', loc.isp ? 'normal' : 'warning');
+            updateMap(loc);
+        } else {
+            setValue('location', 'Location unavailable', 'warning');
+            setValue('sector-name', 'ISP/VPN may be hiding location', 'warning');
+            setValue('isp', 'Unavailable', 'warning');
+            updateMap(null);
+        }
+        updateBars();
+    }
 
     async function updateData() {
+        state.errors = []; state.pingResults = [];
         el('loading').classList.remove('hidden');
         el('sys-status').textContent = 'Syncing...';
-        log("SEARCHING FOR UPLINK...");
-        
-        const start = Date.now();
-        const [ip4, ip6] = await Promise.all([
-            fetch('https://api.ipify.org?format=json').then(r => r.json()),
-            fetch('https://api64.ipify.org?format=json').then(r => r.json()).catch(() => ({ip: 'NONE'}))
-        ]);
-        const pingTime = Date.now() - start;
+        log('SEARCHING FOR UPLINK...');
+        const start = performance.now();
 
-        let loc = await fetch('https://ipapi.co/json/').then(r => r.json()).catch(() => null);
-        if(!loc?.latitude) {
-            const f = await fetch('https://ipwho.is/').then(r => r.json());
-            loc = { country_name: f.country, city: f.city, region: f.region, org: f.connection?.isp, latitude: f.latitude, longitude: f.longitude };
+        try {
+            await detectIPs();
+            if (state.ipv4) log(`UPLINK ADDRESS CONFIRMED: ${state.ipv4}`, 'ok');
+            if (state.ipv6) log(`GATEWAY TUNNEL CONFIRMED: ${state.ipv6}`, 'ok');
+            if (!state.ipv6) log('GATEWAY TUNNEL: IPv6 NOT DETECTED', 'warn');
+
+            state.location = await getLocation();
+            state.lookupMs = Math.round(performance.now() - start);
+            renderData();
+
+            if (state.location) {
+                const locText = joinClean([state.location.city, state.location.region, state.location.country], 'approximate location unavailable');
+                log(`UPLINK SECURED. SECTOR IDENTIFIED: ${locText}`, 'ok');
+                if (state.provider) log(`LOCATION SOURCE: ${state.provider}`, 'ok');
+            } else {
+                log('LOCATION UNAVAILABLE. VPN, ISP ROUTING, OR API LIMIT MAY BE THE CAUSE.', 'warn');
+            }
+
+            await runPingTest(false);
+            el('sys-status').textContent = 'Tactical Ready';
+        } catch (err) {
+            state.lookupMs = Math.round(performance.now() - start);
+            renderData();
+            el('sys-status').textContent = 'Link Degraded';
+            log(`CRITICAL LOOKUP ERROR: ${err.message}`, 'err');
+        } finally {
+            updateBars();
+            setTimeout(() => el('loading').classList.add('hidden'), 500);
         }
-
-        el('ipv4').textContent = ip4.ip;
-        el('ipv6').textContent = ip6.ip;
-        el('ping').textContent = `${pingTime}ms // SECURE`;
-
-        if(loc) {
-            el('location').textContent = loc.country_name;
-            el('sector-name').textContent = `${loc.city}, ${loc.region}`;
-            el('isp').textContent = loc.org;
-            const off = 0.02;
-            el('map').src = `https://www.openstreetmap.org/export/embed.html?bbox=${loc.longitude-off},${loc.latitude-off},${loc.longitude+off},${loc.latitude+off}&layer=mapnik&marker=${loc.latitude},${loc.longitude}`;
-            log("UPLINK SECURED. SECTOR IDENTIFIED.");
-        }
-
-        el('sys-status').textContent = 'Tactical Ready';
-        setTimeout(() => el('loading').classList.add('hidden'), 1000);
     }
 
-    function reboot() {
-        log("INITIATING SYSTEM REBOOT...");
-        updateData();
+    async function measureHttpLatency(name, url) {
+        const start = performance.now();
+        try {
+            await fetchJSON(url, 6500);
+            return { name, ms: Math.round(performance.now() - start), ok: true };
+        } catch (err) {
+            return { name, ms: null, ok: false, error: err.message };
+        }
     }
 
-    function copyIP() {
-        navigator.clipboard.writeText(el('ipv4').textContent);
-        log("IP DATA EXTRACTED TO CLIPBOARD.");
+    async function runPingTest(userStarted = false) {
+        if (userStarted) log('PING TEST STARTED. Browser mode = HTTP latency.', 'warn');
+        else log('PING TEST STARTED. Measuring HTTP request latency...', 'warn');
+
+        const targets = [
+            ['IPIFY-V4', 'https://api.ipify.org?format=json'],
+            ['IPIFY-V6/64', 'https://api64.ipify.org?format=json'],
+            ['GEOJS', state.ipv4 ? `https://get.geojs.io/v1/ip/geo/${encodeURIComponent(state.ipv4)}.json` : 'https://get.geojs.io/v1/ip/geo.json'],
+            ['IPAPI', state.ipv4 ? `https://ipapi.co/${encodeURIComponent(state.ipv4)}/json/` : 'https://ipapi.co/json/'],
+            ['IPWHO', state.ipv4 ? `https://ipwho.is/${encodeURIComponent(state.ipv4)}` : 'https://ipwho.is/']
+        ];
+
+        const results = [];
+        for (const [name, url] of targets) {
+            const result = await measureHttpLatency(name, url);
+            results.push(result);
+            if (result.ok) log(`PING ${result.name}: ${result.ms}ms`, 'ok');
+            else log(`PING ${result.name}: FAILED (${result.error})`, 'warn');
+        }
+
+        state.pingResults = results;
+        const okResults = results.filter(r => r.ok);
+        if (okResults.length) {
+            const avg = Math.round(okResults.reduce((sum, r) => sum + r.ms, 0) / okResults.length);
+            log(`PING AVG: ${avg}ms across ${okResults.length}/${results.length} targets`, 'ok');
+        } else {
+            log('PING TEST FAILED: no HTTP targets responded.', 'err');
+        }
+    }
+
+    function reboot() { log('INITIATING SYSTEM REBOOT...'); updateData(); }
+
+    async function copyIP() {
+        const payload = [
+            state.ipv4 ? `IPv4: ${state.ipv4}` : null,
+            state.ipv6 ? `IPv6: ${state.ipv6}` : null
+        ].filter(Boolean).join('\n') || el('ipv4').textContent;
+
+        try {
+            await navigator.clipboard.writeText(payload);
+            log('IP DATA EXTRACTED TO CLIPBOARD.', 'ok');
+        } catch (err) {
+            log(`CLIPBOARD ACCESS FAILED: ${err.message}`, 'warn');
+        }
+    }
+
+    function buildReport() {
+        return {
+            generatedAt: new Date().toISOString(), ipv4: state.ipv4, ipv6: state.ipv6,
+            location: state.location, lookupMs: state.lookupMs, pingResults: state.pingResults,
+            provider: state.provider,
+            browser: {
+                userAgent: navigator.userAgent, language: navigator.language,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                screen: `${window.screen.width}x${window.screen.height}`, online: navigator.onLine
+            },
+            notes: ['IP-based location is approximate.', 'Browser ping uses HTTP request latency, not ICMP ping.', 'VPNs, CGNAT, ISP routing, and CDN routing can change the visible location.'],
+            errors: state.errors
+        };
     }
 
     function downloadLog() {
-        const blob = new Blob([el('term-logs').innerText], {type: 'text/plain'});
+        const report = buildReport();
+        const terminalText = el('term-logs').innerText;
+        const content = `UNSC NETWORK DIAGNOSTICS\n\n${JSON.stringify(report, null, 2)}\n\nTERMINAL LOG\n${terminalText}\n`;
+        const blob = new Blob([content], {type: 'text/plain'});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'unsc_diag.log';
-        a.click();
-        log("ARCHIVING SYSTEM LOGS...");
+        a.download = `unsc_diag_${new Date().toISOString().replace(/[:.]/g, '-')}.log`;
+        a.click(); URL.revokeObjectURL(a.href);
+        log('ARCHIVING SYSTEM LOGS...', 'ok');
     }
 
-    window.onresize = initNeural;
+    window.addEventListener('resize', initNeural);
+    window.addEventListener('online', () => log('NETWORK STATUS: ONLINE', 'ok'));
+    window.addEventListener('offline', () => log('NETWORK STATUS: OFFLINE', 'err'));
     window.onload = () => { initNeural(); drawNeural(); updateData(); };
 </script>
 
